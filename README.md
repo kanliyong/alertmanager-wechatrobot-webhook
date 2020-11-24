@@ -1,6 +1,11 @@
 # alertmanager-wechatrobot-webhook
 Convert alertmanger webhook messages to qiye WeChat robots that can receive messages
 
+## build
+```bash
+env CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build  alertmanager-wechatbot-webhook.go
+```
+
 ## How use
 ```
 ./alertmanager-wechatbot-webhook  --RobotKey="xxxxxx-xxxxx-xxxxx-xxxxxx-xxxxxxx"

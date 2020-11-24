@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"prometheus-to-webhook/model"
-	"prometheus-to-webhook/transformer"
+	"alertmanager-wechatrobot-webhook/model"
+	"alertmanager-wechatrobot-webhook/transformer"
 )
 
 // Send send markdown message to dingtalk
