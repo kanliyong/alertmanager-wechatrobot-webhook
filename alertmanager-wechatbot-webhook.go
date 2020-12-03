@@ -51,5 +51,8 @@ func main() {
 		c.JSON(http.StatusOK, gin.H{"message": "send to wechatbot successful!"})
 
 	})
-	router.Run(":8999")
+	err := router.Run(":8999")
+	if err != nil{
+		panic(err)
+	}
 }

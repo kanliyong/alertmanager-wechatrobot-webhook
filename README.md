@@ -4,6 +4,14 @@ Convert alertmanger webhook messages to qiye WeChat robots that can receive mess
 ## build
 ```bash
 env CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build  alertmanager-wechatbot-webhook.go
+
+docker build -t ccr.ccs.tencentyun.com/eqxiu/alertmanager-wechatbot-webhook  .
+docker push ccr.ccs.tencentyun.com/eqxiu/alertmanager-wechatbot-webhook
+
+
+./nginx-kafaka-exporter -servers=hadoop104.eqxiu.com:9092,hadoop105.eqxiu.com:9092,hadoop106.eqxiu.com:9092 \
+-group_id=gateway_original_test\
+-topic=gateway_original
 ```
 
 ## How use

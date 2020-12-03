@@ -2,8 +2,9 @@ package notifier
 
 import (
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
-	"fmt"
+	"log"
 	"net/http"
 
 	"alertmanager-wechatrobot-webhook/model"
@@ -19,17 +20,23 @@ func Send(notification model.Notification, defaultRobot string) (err error) {
 		return
 	}
 
+	SendMarkDown(markdown, robotURL, defaultRobot)
+	return
+}
+
+func SendMarkDown(markdown *model.WeChatMarkdown,robotURL string, robot string){
 	data, err := json.Marshal(markdown)
+
+	println(data)
 	if err != nil {
 		return
 	}
 
 	var wechatRobotURL string
-
-	if robotURL != "" {
+	if robotURL != ""{
 		wechatRobotURL = robotURL
-	} else {
-		wechatRobotURL = "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=" + defaultRobot
+	}else{
+		wechatRobotURL = "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=" + robot
 	}
 
 	req, err := http.NewRequest(
@@ -38,20 +45,27 @@ func Send(notification model.Notification, defaultRobot string) (err error) {
 		bytes.NewBuffer(data))
 
 	if err != nil {
+		log.Println(err)
 		return
 	}
 
 	req.Header.Set("Content-Type", "application/json")
-	client := &http.Client{}
+	tr := &http.Transport{
+		TLSClientConfig:        &tls.Config{InsecureSkipVerify:true},
+	}
+	client := &http.Client{
+		Transport: tr,
+	}
 	resp, err := client.Do(req)
 
 	if err != nil {
+		log.Println(err)
 		return
 	}
 
 	defer resp.Body.Close()
-	fmt.Println("response Status:", resp.Status)
-	fmt.Println("response Headers:", resp.Header)
+	log.Println("response Status:", resp.Status)
+	log.Println("response Headers:", resp.Header)
 
 	return
 }

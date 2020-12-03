@@ -1,0 +1,109 @@
+apiVersion: v1
+data:
+  template.txt: |
+    # {{ if eq .Status "resolved"}}<font color="info">恢复</font>{{ else if eq .Status "firing"}}<font color="warning">触发</font>{{end}}  {{.CommonLabels.alertname}}
+    {{if .CommonLabels.severity          }}## 级别: <font color="warning">{{.CommonLabels.severity}}</font>  {{end}}
+    {{ if .CommonAnnotations.description }}## 描述: {{.CommonAnnotations.description }} {{end}}
+    {{ if .CommonAnnotations.summary     }}## 汇总: {{.CommonAnnotations.summary}}      {{end}}
+    {{ range .Alerts}}
+    ------
+    ### {{.Labels.alertname}}
+    {{if .Annotations.description }}#### 描述: {{.Annotations.description}} {{end}}
+    {{if .Annotations.summary }}#### 汇总: {{.Annotations.summary}} {{end}}
+    ##### 标签:
+    {{ range $key, $value := .Labels}}
+    1. {{$key}}: {{$value}}
+    {{end}}
+    {{ if not .StartsAt.IsZero }}触发时间 {{.StartsAt | fdate}} {{end}}
+    {{ if not .EndsAt.IsZero }}恢复时间 {{.EndsAt | fdate}}   {{end}}
+    {{end}}
+kind: ConfigMap
+metadata:
+  name: cm-alertmanager-wechatbot-webhook-template
+  namespace: eqxiu-ops
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    description: svc-alertmanager-wechatbot-webhook
+    service.kubernetes.io/qcloud-loadbalancer-internal-subnetid: subnet-2tdvvzeh
+  name: svc-alertmanager-wechatbot-webhook
+  namespace: eqxiu-ops
+spec:
+  ports:
+    - name: port
+      protocol: TCP
+      port: 8999
+      targetPort: 8999
+  selector:
+    qcloud-app: alertmanager-wechatbot-webhook
+  sessionAffinity: None
+  type: LoadBalancer
+
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    description: alertmanager-wechatbot-webhook
+  labels:
+    qcloud-app: alertmanager-wechatbot-webhook
+  name: alertmanager-wechatbot-webhook
+  namespace: eqxiu-ops
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      qcloud-app: alertmanager-wechatbot-webhook
+  template:
+    metadata:
+      labels:
+        qcloud-app: alertmanager-wechatbot-webhook
+    spec:
+      containers:
+      - name: alertmanager-wechatbot-webhook
+        image: ccr.ccs.tencentyun.com/eqxiu/alertmanager-wechatbot-webhook
+        env:
+        - name: "template_path"
+          value: "/conf/template.txt"
+        imagePullPolicy: Always
+        ports:
+        - name: port
+          containerPort: 8999
+        livenessProbe:
+          tcpSocket:
+            port: 8999
+        readinessProbe:
+          tcpSocket:
+            port: 8999
+        resources:
+          limits:
+            memory: 256Mi
+          requests:
+            memory: 256Mi
+        securityContext:
+          privileged: false
+        volumeMounts:
+        - mountPath: /conf
+          name: config
+      dnsPolicy: ClusterFirst
+      imagePullSecrets:
+      - name: qcloudregistrykey
+      - name: tencenthubkey
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: config
+        configMap:
+          name: cm-alertmanager-wechatbot-webhook-template
+  revisionHistoryLimit: 5
+  progressDeadlineSeconds: 600
+  minReadySeconds: 10
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+    type: RollingUpdate
