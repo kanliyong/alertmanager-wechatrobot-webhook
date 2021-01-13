@@ -23,30 +23,35 @@ func TransformToMarkdown(notification model.Notification) (markdown *model.WeCha
 	markdown = &model.WeChatMarkdown{
 		MsgType: "markdown",
 		Markdown: &model.Markdown{
-			Content:  buffer.String(),
+			Content: buffer.String(),
 		},
 	}
 
 	return
 }
 
-
-func toContent(notification model.Notification) (content string, err error){
+func toContent(notification model.Notification) (content string, err error) {
 
 	templateString := templateString()
 	out := bytes.NewBuffer([]byte{})
 
 	funcMap := template.FuncMap{"fdate": formDate}
-	t ,err := template.New("test").Funcs(funcMap).Parse(templateString)
+	t, err := template.New("test").Funcs(funcMap).Parse(templateString)
 	if err != nil {
 		return
 	}
-	err = t.Execute(out,  notification)
+	err = t.Execute(out, notification)
 	return out.String(), nil
 }
 
-func formDate(t time.Time) string{
-	return t.Format("02 Jan 06 15:04:05")
+func formDate(t time.Time) string {
+	layout := "2006-01-02 15:04:05"
+	// loc, err := time.LoadLocation("Local")
+	// if err != nil {
+	// 	log.Panicf("LoadLocation err %v", err)
+	// 	return t.Format(layout)
+	// }
+	return t.Local().Format(layout)
 }
 
 var defaultTemplateString = `# {{ if eq .Status "resolved"}}<font color="info">恢复</font>{{ else if eq .Status "firing"}}<font color="warning">触发</font>{{end}}  {{.CommonLabels.alertname}}  
@@ -66,7 +71,8 @@ var defaultTemplateString = `# {{ if eq .Status "resolved"}}<font color="info">�
 {{ if not .EndsAt.IsZero }}恢复时间 {{.EndsAt | fdate}}   {{end}}
 {{end}}
 `
-func templateString() string{
+
+func templateString() string {
 	filePath := os.Getenv("template_path")
 	if filePath == "" {
 		return defaultTemplateString
@@ -76,7 +82,7 @@ func templateString() string{
 		return defaultTemplateString
 	}
 
-	b , err := ioutil.ReadAll(file)
+	b, err := ioutil.ReadAll(file)
 	if err != nil {
 		return defaultTemplateString
 	}

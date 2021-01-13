@@ -95,7 +95,7 @@ curl 'http://127.0.0.1:8999/webhook'  -H 'Content-Type: application/json'    -d 
 
 ### 2、使用指定微信机器人发送消息
 ```
-curl 'http://127.0.0.1:8999/webhook?key=xxxxxx-xxxxx-xxxxx-xxxxxx-xxxxxxx'  -H 'Content-Type: application/json'    -d '
+curl 'http://127.0.0.1:8999/webhook?key=0717e9e1-cc70-4d1a-b36c-99c1584d77d7'  -H 'Content-Type: application/json'    -d '
   {
     "receiver": "webhook-test",
     "status": "firing",
@@ -112,7 +112,7 @@ curl 'http://127.0.0.1:8999/webhook?key=xxxxxx-xxxxx-xxxxx-xxxxxx-xxxxxxx'  -H '
           "description": "This is test summary,ignore",
           "summary": "This is test message,ignore"
         },
-        "startsAt": "2019-07-24T02:38:30.763785079Z",
+        "startsAt": "2020-01-14T14:38:30+00:00",
         "endsAt": "0001-01-01T00:00:00Z",
         "generatorURL": "critical"
       }

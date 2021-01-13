@@ -2,7 +2,6 @@ package notifier
 
 import (
 	"bytes"
-	"crypto/tls"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -51,7 +50,7 @@ func SendMarkDown(markdown *model.WeChatMarkdown,robotURL string, robot string){
 
 	req.Header.Set("Content-Type", "application/json")
 	tr := &http.Transport{
-		TLSClientConfig:        &tls.Config{InsecureSkipVerify:true},
+		//TLSClientConfig:        &tls.Config{InsecureSkipVerify:true},
 	}
 	client := &http.Client{
 		Transport: tr,
