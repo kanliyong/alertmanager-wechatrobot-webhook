@@ -81,6 +81,7 @@ func templateString() string {
 	if err != nil {
 		return defaultTemplateString
 	}
+	defer file.Close()
 
 	b, err := ioutil.ReadAll(file)
 	if err != nil {
